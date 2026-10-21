@@ -95,6 +95,24 @@ def enrich_ci(repositories: list[dict], owner: str, limit: int = 20) -> list[dic
             elif runs[0].get("status") == "completed":
                 conclusion = runs[0].get("conclusion")
                 status = conclusion if conclusion in _CI_RESULTS else "unavailable"
+                # A failed workflow with zero executed steps is an infrastructure issue,
+                # not evidence that the repository's test suite failed.
+                run_id = runs[0].get("id")
+                if status == "failure" and isinstance(run_id, int) and run_id > 0:
+                    try:
+                        jobs_data = _api(
+                            f"repos/{quote(owner, safe='')}/{quote(repo['name'], safe='')}/actions/runs/{run_id}/jobs?per_page=20",
+                            paginate=False,
+                        )
+                        jobs = jobs_data.get("jobs") if isinstance(jobs_data, dict) else None
+                        if (isinstance(jobs, list) and jobs
+                                and all(isinstance(j, dict)
+                                        and j.get("conclusion") == "failure"
+                                        and not j.get("steps")
+                                        and not j.get("runner_name") for j in jobs)):
+                            status = "startup_failure"
+                    except GitHubError:
+                        pass  # Failure remains a failure if job details are unavailable.
             else:
                 current = runs[0].get("status")
                 status = current if current in _CI_PENDING else "unavailable"
