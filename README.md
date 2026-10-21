@@ -33,7 +33,7 @@ Test: `python -m unittest discover -s tests -v`
 
 Bu sürüm yalnızca metadata okur; GitHub üzerinde issue, PR veya repo değiştirmez.
 
-## CI triage (geliştirme dalı)
+## CI triage
 
 Kendi hesabındaki **özel depoları** görebilmek için GitHub CLI ile kendi hesabında oturum açmış olman gerekir. Varsayılan rapor özel depoları **dışlar**; raporlar bulutta yayımlanmaz.
 
