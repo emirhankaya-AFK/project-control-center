@@ -53,6 +53,8 @@ def analyze(repositories: list[dict], now: datetime | None = None) -> dict:
                     - (30 if ci_status in _BAD_CI and not archived else 0))
         if archived:
             action = "Arşivlenmiş; eylem gerekmiyor"
+        elif ci_status == "startup_failure":
+            action = "GitHub Actions runner ve hesap kullanım durumunu incele; test adımı çalışmadı"
         elif ci_status in _BAD_CI:
             action = "Son GitHub Actions çalışmasının loglarını incele"
         elif repo.get("open_issues", 0) >= 10:
