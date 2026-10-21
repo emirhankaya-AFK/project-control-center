@@ -50,7 +50,9 @@ pcc --input snapshot.json
 
 - En son GitHub Actions iş akışı çalışmasının sonucunu görüntüler. Workflow çalışması bulunmadığında **Çalışma bulunamadı** yazar; bunun CI kurulmadığını kanıtlamadığını unutma.
 - Başarısız CI bakım puanına 30 puana kadar etki eder ve log incelemesini bir sonraki eylem olarak önerir; puan yazılım kalitesi ölçümü değildir.
-- Yetki, ağ veya API hatalarını **Doğrulanamadı**; sorgulanmamış depoları **Kontrol edilmedi** gösterir. Hiçbirini başarılı kabul etmez.
+- Yetki, ağ veya API hatalarını **Doğrulanamadı**; sorgulanmamış depoları **Kontrol edilmedi** gösterir.
+- Başarısız Actions çalışmasında job kaydı olsa da **runner adı ve çalıştırılmış adımlar yoksa** olayı **Başlatılamadı** sınıfında gösterir. Bu durum test hatası olarak sunulmaz; runner/kota/hesap durumu ayrıca incelenmelidir. Job ayrıntıları okunamazsa normal **Başarısız** durumu korunur ve testlerin çalıştığı varsayılmaz.
+- Başarısız bir çalışmanın job ayrıntısı için en fazla bir ek salt-okunur istek yapılır. Hiçbirini başarılı kabul etmez.
 - **--ci-limit** en fazla 100 sorguyla sınırlıdır (varsayılan 20); arşivli depolar sorgulanmaz.
 - GitHub CLI'nin oturumunun Actions okuma yetkisi gerekir. Herhangi bir issue/PR/depo, workflow veya secret değiştirilmez; yalnızca yerel HTML/JSON raporları yazılır.
 - Özel raporları internete yükleme: repo isimleri, durumları ve bağlantıları mahrem olabilir.
