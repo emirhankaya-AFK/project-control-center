@@ -7,11 +7,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.11'
-      - run: python -m pip install -e .
-      - run: python -m unittest discover -s tests -v
-
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Smoke test offline CLI and generated reports
+        run: |
+          python -c 'import json; from pathlib import Path; Path("ci-snapshot.json").write_text(json.dumps([{"name":"demo","description":"smoke","language":"Python","private":False,"archived":False,"url":"https://github.com/example/demo","open_issues":0}]), encoding="utf-8")'
+          pcc --input ci-snapshot.json --output reports
+          python -c 'import json; from pathlib import Path; a=json.loads(Path("reports/audit.json").read_text(encoding="utf-8")); assert a["total"] == 1; assert Path("reports/index.html").is_file()'
