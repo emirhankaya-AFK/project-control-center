@@ -31,4 +31,4 @@ jobs:
         run: |
           gh --version
           pcc --owner emirhankaya-AFK --check-ci --ci-limit 3 --output reports/live-public
-          python -c 'import json; from pathlib import Path; a=json.loads(Path("reports/live-public/audit.json").read_text(encoding="utf-8")); assert a["total"] > 0; assert a["private"] == 0; assert Path("reports/live-public/index.html").is_file(); print(f"Live public audit: {chr(123)}a[chr(39)+chr(116)+chr(111)+chr(116)+chr(97)+chr(108)+chr(39)]{chr(125)} repositories")'
+          python -c 'import json; from pathlib import Path; a=json.loads(Path("reports/live-public/audit.json").read_text(encoding="utf-8")); assert a["total"] > 0; assert a["private"] == 0; assert Path("reports/live-public/index.html").is_file(); print("Live public audit:", a["total"], "repositories")'
