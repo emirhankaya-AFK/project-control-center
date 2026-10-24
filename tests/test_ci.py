@@ -20,6 +20,28 @@ class CITests(unittest.TestCase):
             self.assertEqual(collect("alice"), [])
         self.assertTrue(api.call_args_list[1].args[0].startswith("users/alice/repos?"))
 
+    def test_public_scan_without_user_identity_falls_back_safely(self):
+        item = {"name": "public-project", "private": False,
+                "owner": {"login": "alice"}}
+        with patch("project_control_center.github._api",
+                   side_effect=[GitHubError("GitHub App token"), [[item]]]) as api:
+            repos = collect("alice")
+        self.assertEqual([r["name"] for r in repos], ["public-project"])
+        self.assertTrue(api.call_args_list[1].args[0].startswith("users/alice/repos?"))
+
+    def test_private_scan_rejects_unverified_identity(self):
+        with patch("project_control_center.github._api",
+                   side_effect=GitHubError("GitHub App token")) as api:
+            with self.assertRaisesRegex(GitHubError, "Private scan"):
+                collect("alice", require_owner_auth=True)
+        self.assertEqual(api.call_count, 1)
+
+    def test_private_scan_rejects_different_authenticated_user(self):
+        with patch("project_control_center.github._api", return_value={"login": "github-actions[bot]"}) as api:
+            with self.assertRaisesRegex(GitHubError, "requested owner"):
+                collect("alice", require_owner_auth=True)
+        self.assertEqual(api.call_count, 1)
+
     def test_bounded_ci_and_pending(self):
         repos = [{"name": "older", "pushed_at": "2026-01-01"},
                  {"name": "newer", "pushed_at": "2026-10-01"},

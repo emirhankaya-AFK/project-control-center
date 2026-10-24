@@ -4,6 +4,7 @@ on:
   pull_request:
 permissions:
   contents: read
+  actions: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,3 +25,10 @@ jobs:
           python -c 'import json; from pathlib import Path; Path("ci-snapshot.json").write_text(json.dumps([{"name":"demo","description":"smoke","language":"Python","private":False,"archived":False,"url":"https://github.com/example/demo","open_issues":0}]), encoding="utf-8")'
           pcc --input ci-snapshot.json --output reports
           python -c 'import json; from pathlib import Path; a=json.loads(Path("reports/audit.json").read_text(encoding="utf-8")); assert a["total"] == 1; assert Path("reports/index.html").is_file()'
+      - name: Live GitHub CLI public portfolio scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh --version
+          pcc --owner emirhankaya-AFK --check-ci --ci-limit 3 --output reports/live-public
+          python -c 'import json; from pathlib import Path; a=json.loads(Path("reports/live-public/audit.json").read_text(encoding="utf-8")); assert a["total"] > 0; assert a["private"] == 0; assert Path("reports/live-public/index.html").is_file(); print("Live public audit:", a["total"], "repositories")'

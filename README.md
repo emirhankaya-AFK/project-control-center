@@ -55,6 +55,7 @@ pcc --input snapshot.json
 - Başarısız bir çalışmanın job ayrıntısı için en fazla bir ek salt-okunur istek yapılır. Hiçbirini başarılı kabul etmez.
 - **--ci-limit** en fazla 100 sorguyla sınırlıdır (varsayılan 20); arşivli depolar sorgulanmaz.
 - GitHub CLI'nin oturumunun Actions okuma yetkisi gerekir. Herhangi bir issue/PR/depo, workflow veya secret değiştirilmez; yalnızca yerel HTML/JSON raporları yazılır.
+- GitHub Actions `GITHUB_TOKEN` gibi uygulama tokenları `/user` sorgusunu engelleyebilir; **public-only** tarama güvenle `/users/{owner}/repos` yoluna geçer. `--include-private` ise otomatik public'e düşmez: seçilen hesapla kimlik doğrulaması zorunludur, aksi halde açık hata üretir.
 - Özel raporları internete yükleme: repo isimleri, durumları ve bağlantıları mahrem olabilir.
 
 Test: `PYTHONPATH=src python -m unittest discover -s tests -v` (Windows PowerShell'de `$env:PYTHONPATH='src'`).
