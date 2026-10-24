@@ -28,7 +28,7 @@ def main() -> int:
         if args.input:
             repositories = json.loads(args.input.read_text(encoding="utf-8"))
         else:
-            repositories = collect(args.owner)
+            repositories = collect(args.owner, require_owner_auth=args.include_private)
         if not isinstance(repositories, list) or any(not isinstance(r, dict) for r in repositories):
             raise ValueError("JSON bir repo nesneleri listesi olmalı")
         if not args.include_private:
