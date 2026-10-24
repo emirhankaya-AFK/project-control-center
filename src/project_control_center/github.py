@@ -28,13 +28,26 @@ def _api(path: str, *, paginate: bool = True) -> object:
         raise GitHubError("GitHub returned invalid JSON") from exc
 
 
-def collect(owner: str) -> list[dict]:
-    """Collect owned repositories; authenticated owner's private repos are included."""
+def collect(owner: str, *, require_owner_auth: bool = False) -> list[dict]:
+    """Collect owned repositories; require verified owner login for private scans.
+
+    GitHub Actions installation tokens cannot always access the /user endpoint.
+    Public-only scans can safely fall back to GitHub's public /users API.
+    """
     if not owner or not owner.strip():
         raise ValueError("Owner is required")
     safe_owner = quote(owner, safe="")
-    me = _api("user", paginate=False)
-    if isinstance(me, dict) and str(me.get("login", "")).lower() == owner.lower():
+    try:
+        me = _api("user", paginate=False)
+    except GitHubError as exc:
+        if require_owner_auth:
+            raise GitHubError("Private scan requires an authenticated gh session for the requested owner") from exc
+        me = {}
+    is_owner = (isinstance(me, dict)
+                and str(me.get("login", "")).lower() == owner.lower())
+    if require_owner_auth and not is_owner:
+        raise GitHubError("Private scan requires a gh session authenticated as the requested owner")
+    if is_owner:
         path = "user/repos?per_page=100&affiliation=owner&sort=updated"
     else:
         path = f"users/{safe_owner}/repos?per_page=100&type=owner&sort=updated"
